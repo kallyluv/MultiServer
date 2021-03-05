@@ -6,9 +6,6 @@ use xjustjqy\MultiServer\Loader as API;
 use pocketmine\Server as Default;
 
 class Server extends Default {
-	
-	/** @var self */
-	private const instance = $this;
  
   /** @var Level[] */
   protected $levels = [];
@@ -20,6 +17,7 @@ class Server extends Default {
   private $id;
   
   public function __construct(Default $server, string $name, int $id) {
+		define("ServerInstance", $this);
     $this->server = $server;
     $this->name = $name;
     $this->id = $id;
@@ -27,7 +25,7 @@ class Server extends Default {
   }
 	
 	public static function getInstance() {
-		return self::instance;	
+		return ServerInstance;	
 	}
   
   public function loadLevels() {
