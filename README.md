@@ -5,7 +5,7 @@ A proxy plugin!
 
 # SneakPeeks
 
-<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/BwNlNTnYg2o" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+[![Sneakpeek!!!](http://i3.ytimg.com/vi/BwNlNTnYg2o/maxresdefault.jpg)](https://youtu.be/BwNlNTnYg2o)
 
 # Contribution
 
