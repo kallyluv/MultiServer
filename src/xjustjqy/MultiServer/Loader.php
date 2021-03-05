@@ -57,6 +57,10 @@ class Loader extends PluginBase {
     $dataFolder = $folderName . "MultiServer/";
     return $dataFolder;
   }
+  
+  public static function getServersFolder() : ?string {
+   return self::getConfigFolder() . "servers/"; 
+  }
 
   public static function getSettings() : ?Config {
     return self::$settings_manager->fetchConfig();
