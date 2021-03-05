@@ -23,7 +23,6 @@ class Loader extends PluginBase {
   
   private function initServers() {
    foreach(self::$settings_manager->getServers() as $server) {
-     $file = "classmap\\Server";
      self::$servers[] = new Server($this->getServer());
    }
   }
