@@ -1,0 +1,5 @@
+name: MultiServer
+main: xjustjqy\MultiServer\Loader
+version: 0.0.1
+api: 3.17.0
+author: xJustJqy
