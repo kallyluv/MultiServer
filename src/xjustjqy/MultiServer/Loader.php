@@ -18,7 +18,7 @@ class Loader extends PluginBase {
     self::$instance = $this;
     $arr = explode("plugins", $this->getFile());
     $folderName = $arr[0];
-    self::$dataFolder = $folderName . "settings/";
+    self::$dataFolder = $folderName . "MultiServer/";
     self::$settings_manager = new SettingsManager();
   }
 
