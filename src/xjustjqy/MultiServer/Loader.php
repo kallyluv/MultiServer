@@ -17,10 +17,13 @@ class Loader extends PluginBase {
   private static $settings_manager;
   /** @var array */
   private static $servers = [];
+  /** @var PlayerManager */
+  private static $player_manager;
 
   public function onEnable() {
     self::$instance = $this;
     self::$settings_manager = new SettingsManager();
+    self::$player_manager = new PlayerManager();
     $this->initServers();
     $this->initPlugins();
     $this->getServer()->getCommandMap()->registerAll("multiserver", [
@@ -77,6 +80,10 @@ class Loader extends PluginBase {
 
   public static function getSettings() : ?SettingsManager {
     return self::$settings_manager;
+  }
+
+  public static function getPlayerManager() : PlayerManager {
+    return self::$player_manager;
   }
 
 }

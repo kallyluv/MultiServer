@@ -54,12 +54,13 @@ use function strlen;
 use function substr;
 use const DIRECTORY_SEPARATOR;
 
-class PluginLoader {
-  
-  /** @var string */
-  
-  private $dir;
-  /** @var SudoServer */
+class PluginLoader
+{
+
+	/** @var string */
+
+	private $dir;
+	/** @var SudoServer */
 	private $server;
 
 	/** @var SimpleCommandMap */
@@ -79,73 +80,90 @@ class PluginLoader {
 
 	/** @var string|null */
 	private $pluginDataDirectory;
-  
-  public function __construct(string $dir, SudoServer $server, SimpleCommandMap $commandMap, ?string $pluginDataDirectory) {
-    $this->dir = $dir; 
-    $this->server = $server;
+
+	public function __construct(string $dir, SudoServer $server, SimpleCommandMap $commandMap, ?string $pluginDataDirectory)
+	{
+		$this->dir = $dir;
+		$this->server = $server;
 		$this->commandMap = $commandMap;
 		$this->pluginDataDirectory = $pluginDataDirectory;
-		if($this->pluginDataDirectory !== null){
-			if(!file_exists($this->pluginDataDirectory)){
+		$pluginDirectory = str_replace("_data", "s", $pluginDataDirectory);
+		if ($this->pluginDataDirectory !== null) {
+			if (!file_exists($this->pluginDataDirectory)) {
 				@mkdir($this->pluginDataDirectory, 0777, true);
-			}elseif(!is_dir($this->pluginDataDirectory)){
+			} elseif (!is_dir($this->pluginDataDirectory)) {
 				throw new \RuntimeException("Plugin data path $this->pluginDataDirectory exists and is not a directory");
 			}
 		}
-    $this->registerInterface($this);
-  }
-  
-  public function registerInterface(PluginLoader $loader) : void{
+		if ($pluginDirectory !== null) {
+			if (!file_exists($pluginDirectory)) {
+				@mkdir($pluginDirectory, 0777, true);
+			} elseif (!is_dir($pluginDirectory)) {
+				throw new \RuntimeException("Plugin data path $pluginDirectory exists and is not a directory");
+			}
+		}
+		$this->registerInterface($this);
+	}
+
+	public function registerInterface(PluginLoader $loader): void
+	{
 		$this->fileAssociations[get_class($loader)] = $loader;
 	}
-  
-  public function canLoadPlugin(string $path) : bool{
+
+	public function canLoadPlugin(string $path): bool
+	{
 		$ext = ".phar";
 		return is_file($path) and substr($path, -strlen($ext)) === $ext;
 	}
-  
-  public function getPluginDescription(string $file) : ?PluginDescription{
+
+	public function getPluginDescription(string $file): ?PluginDescription
+	{
 		$phar = new \Phar($file);
-		if(isset($phar["plugin.yml"])){
+		if (isset($phar["plugin.yml"])) {
 			return new PluginDescription($phar["plugin.yml"]->getContent());
 		}
 
 		return null;
 	}
 
-	public function getAccessProtocol() : string{
+	public function getAccessProtocol(): string
+	{
 		return "phar://";
 	}
-  
-  /**
+
+	/**
 	 * @return Plugin[]
 	 */
-	public function getPlugins() : array{
+	public function getPlugins(): array
+	{
 		return $this->plugins;
 	}
 
-	private function getDataDirectory(string $pluginPath, string $pluginName) : string{
-		if($this->pluginDataDirectory !== null){
+	private function getDataDirectory(string $pluginPath, string $pluginName): string
+	{
+		if ($this->pluginDataDirectory !== null) {
 			return $this->pluginDataDirectory . $pluginName;
 		}
 		return dirname($pluginPath) . DIRECTORY_SEPARATOR . $pluginName;
 	}
-  
-  /**
+
+	/**
 	 * @return null|Plugin
 	 */
-	public function getPlugin(string $name){
-		if(isset($this->plugins[$name])){
+	public function getPlugin(string $name)
+	{
+		if (isset($this->plugins[$name])) {
 			return $this->plugins[$name];
 		}
 
 		return null;
 	}
 
-  
-  public function loadPlugins($newLoaders = null) {
-    $directory = $this->dir;
-    if(!is_dir($directory)){
+
+	public function loadPlugins($newLoaders = null)
+	{
+		$directory = $this->dir;
+		if (!is_dir($directory)) {
 			return [];
 		}
 
@@ -153,45 +171,45 @@ class PluginLoader {
 		$loadedPlugins = [];
 		$dependencies = [];
 		$softDependencies = [];
-		if(is_array($newLoaders)){
+		if (is_array($newLoaders)) {
 			$loaders = [];
-			foreach($newLoaders as $key){
-				if(isset($this->fileAssociations[$key])){
+			foreach ($newLoaders as $key) {
+				if (isset($this->fileAssociations[$key])) {
 					$loaders[$key] = $this->fileAssociations[$key];
 				}
 			}
-		}else{
+		} else {
 			$loaders = $this->fileAssociations;
 		}
 
 		$files = iterator_to_array(new \FilesystemIterator($directory, \FilesystemIterator::CURRENT_AS_PATHNAME | \FilesystemIterator::SKIP_DOTS));
 		shuffle($files); //this prevents plugins implicitly relying on the filesystem name order when they should be using dependency properties
-		foreach($loaders as $loader){
-			foreach($files as $file){
-				if(!is_string($file)) throw new AssumptionFailedError("FilesystemIterator current should be string when using CURRENT_AS_PATHNAME");
-				if(!$loader->canLoadPlugin($file)){
+		foreach ($loaders as $loader) {
+			foreach ($files as $file) {
+				if (!is_string($file)) throw new AssumptionFailedError("FilesystemIterator current should be string when using CURRENT_AS_PATHNAME");
+				if (!$loader->canLoadPlugin($file)) {
 					continue;
 				}
-				try{
+				try {
 					$description = $loader->getPluginDescription($file);
-					if($description === null){
+					if ($description === null) {
 						continue;
 					}
 
 					$name = $description->getName();
-					if(stripos($name, "pocketmine") !== false or stripos($name, "minecraft") !== false or stripos($name, "mojang") !== false){
+					if (stripos($name, "pocketmine") !== false or stripos($name, "minecraft") !== false or stripos($name, "mojang") !== false) {
 						$this->server->getLogger()->error($this->server->getLanguage()->translateString("pocketmine.plugin.loadError", [$name, "%pocketmine.plugin.restrictedName"]));
 						continue;
-					}elseif(strpos($name, " ") !== false){
+					} elseif (strpos($name, " ") !== false) {
 						$this->server->getLogger()->warning($this->server->getLanguage()->translateString("pocketmine.plugin.spacesDiscouraged", [$name]));
 					}
 
-					if(isset($plugins[$name]) or $this->getPlugin($name) instanceof Plugin){
+					if (isset($plugins[$name]) or $this->getPlugin($name) instanceof Plugin) {
 						$this->server->getLogger()->error($this->server->getLanguage()->translateString("pocketmine.plugin.duplicateError", [$name]));
 						continue;
 					}
 
-					if(!$this->isCompatibleApi(...$description->getCompatibleApis())){
+					if (!$this->isCompatibleApi(...$description->getCompatibleApis())) {
 						$this->server->getLogger()->error($this->server->getLanguage()->translateString("pocketmine.plugin.loadError", [
 							$name,
 							$this->server->getLanguage()->translateString("%pocketmine.plugin.incompatibleAPI", [implode(", ", $description->getCompatibleApis())])
@@ -199,7 +217,7 @@ class PluginLoader {
 						continue;
 					}
 
-					if(count($description->getCompatibleOperatingSystems()) > 0 and !in_array(Utils::getOS(), $description->getCompatibleOperatingSystems(), true)) {
+					if (count($description->getCompatibleOperatingSystems()) > 0 and !in_array(Utils::getOS(), $description->getCompatibleOperatingSystems(), true)) {
 						$this->server->getLogger()->error($this->server->getLanguage()->translateString("pocketmine.plugin.loadError", [
 							$name,
 							$this->server->getLanguage()->translateString("%pocketmine.plugin.incompatibleOS", [implode(", ", $description->getCompatibleOperatingSystems())])
@@ -207,9 +225,9 @@ class PluginLoader {
 						continue;
 					}
 
-					if(count($pluginMcpeProtocols = $description->getCompatibleMcpeProtocols()) > 0){
+					if (count($pluginMcpeProtocols = $description->getCompatibleMcpeProtocols()) > 0) {
 						$serverMcpeProtocols = [ProtocolInfo::CURRENT_PROTOCOL];
-						if(count(array_intersect($pluginMcpeProtocols, $serverMcpeProtocols)) === 0){
+						if (count(array_intersect($pluginMcpeProtocols, $serverMcpeProtocols)) === 0) {
 							$this->server->getLogger()->error($this->server->getLanguage()->translateString("pocketmine.plugin.loadError", [
 								$name,
 								$this->server->getLanguage()->translateString("%pocketmine.plugin.incompatibleProtocol", [implode(", ", $pluginMcpeProtocols)])
@@ -223,28 +241,28 @@ class PluginLoader {
 					$softDependencies[$name] = array_merge($softDependencies[$name] ?? [], $description->getSoftDepend());
 					$dependencies[$name] = $description->getDepend();
 
-					foreach($description->getLoadBefore() as $before){
-						if(isset($softDependencies[$before])){
+					foreach ($description->getLoadBefore() as $before) {
+						if (isset($softDependencies[$before])) {
 							$softDependencies[$before][] = $name;
-						}else{
+						} else {
 							$softDependencies[$before] = [$name];
 						}
 					}
-				}catch(\Throwable $e){
+				} catch (\Throwable $e) {
 					$this->server->getLogger()->error($this->server->getLanguage()->translateString("pocketmine.plugin.fileError", [$file, $directory, $e->getMessage()]));
 					$this->server->getLogger()->logException($e);
 				}
 			}
 		}
 
-		while(count($plugins) > 0){
+		while (count($plugins) > 0) {
 			$loadedThisLoop = 0;
-			foreach($plugins as $name => $file){
-				if(isset($dependencies[$name])){
-					foreach($dependencies[$name] as $key => $dependency){
-						if(isset($loadedPlugins[$dependency]) or $this->getPlugin($dependency) instanceof Plugin){
+			foreach ($plugins as $name => $file) {
+				if (isset($dependencies[$name])) {
+					foreach ($dependencies[$name] as $key => $dependency) {
+						if (isset($loadedPlugins[$dependency]) or $this->getPlugin($dependency) instanceof Plugin) {
 							unset($dependencies[$name][$key]);
-						}elseif(!isset($plugins[$dependency])){
+						} elseif (!isset($plugins[$dependency])) {
 							$this->server->getLogger()->critical($this->server->getLanguage()->translateString("pocketmine.plugin.loadError", [
 								$name,
 								$this->server->getLanguage()->translateString("%pocketmine.plugin.unknownDependency", [$dependency])
@@ -254,44 +272,44 @@ class PluginLoader {
 						}
 					}
 
-					if(count($dependencies[$name]) === 0){
+					if (count($dependencies[$name]) === 0) {
 						unset($dependencies[$name]);
 					}
 				}
 
-				if(isset($softDependencies[$name])){
-					foreach($softDependencies[$name] as $key => $dependency){
-						if(isset($loadedPlugins[$dependency]) or $this->getPlugin($dependency) instanceof Plugin){
+				if (isset($softDependencies[$name])) {
+					foreach ($softDependencies[$name] as $key => $dependency) {
+						if (isset($loadedPlugins[$dependency]) or $this->getPlugin($dependency) instanceof Plugin) {
 							$this->server->getLogger()->debug("Successfully resolved soft dependency \"$dependency\" for plugin \"$name\"");
 							unset($softDependencies[$name][$key]);
-						}elseif(!isset($plugins[$dependency])){
+						} elseif (!isset($plugins[$dependency])) {
 							//this dependency is never going to be resolved, so don't bother trying
 							$this->server->getLogger()->debug("Skipping resolution of missing soft dependency \"$dependency\" for plugin \"$name\"");
 							unset($softDependencies[$name][$key]);
-						}else{
+						} else {
 							$this->server->getLogger()->debug("Deferring resolution of soft dependency \"$dependency\" for plugin \"$name\" (found but not loaded yet)");
 						}
 					}
 
-					if(count($softDependencies[$name]) === 0){
+					if (count($softDependencies[$name]) === 0) {
 						unset($softDependencies[$name]);
 					}
 				}
 
-				if(!isset($dependencies[$name]) and !isset($softDependencies[$name])){
+				if (!isset($dependencies[$name]) and !isset($softDependencies[$name])) {
 					unset($plugins[$name]);
 					$loadedThisLoop++;
-					if(($plugin = $this->loadPlugin($file, $loaders)) instanceof Plugin){
+					if (($plugin = $this->loadPlugin($file, $loaders)) instanceof Plugin) {
 						$loadedPlugins[$name] = $plugin;
-					}else{
+					} else {
 						$this->server->getLogger()->critical($this->server->getLanguage()->translateString("pocketmine.plugin.genericLoadError", [$name]));
 					}
 				}
 			}
 
-			if($loadedThisLoop === 0){
+			if ($loadedThisLoop === 0) {
 				//No plugins loaded :(
-				foreach($plugins as $name => $file){
+				foreach ($plugins as $name => $file) {
 					$this->server->getLogger()->critical($this->server->getLanguage()->translateString("pocketmine.plugin.loadError", [$name, "%pocketmine.plugin.circularDependency"]));
 				}
 				$plugins = [];
@@ -299,30 +317,31 @@ class PluginLoader {
 		}
 
 		return $loadedPlugins;
-  }
-  
-  /**
+	}
+
+	/**
 	 * @param PluginLoader[] $loaders
 	 */
-	public function loadPlugin(string $path, array $loaders = null) : ?Plugin{
-		foreach($loaders ?? $this->fileAssociations as $loader){
-			if($loader->canLoadPlugin($path)){
+	public function loadPlugin(string $path, array $loaders = null): ?Plugin
+	{
+		foreach ($loaders ?? $this->fileAssociations as $loader) {
+			if ($loader->canLoadPlugin($path)) {
 				$description = $loader->getPluginDescription($path);
-				if($description instanceof PluginDescription){
+				if ($description instanceof PluginDescription) {
 					$this->server->getLogger()->info($this->server->getLanguage()->translateString("pocketmine.plugin.load", [$description->getFullName()]));
-					try{
+					try {
 						$description->checkRequiredExtensions();
-					}catch(PluginException $ex){
+					} catch (PluginException $ex) {
 						$this->server->getLogger()->error($ex->getMessage());
 						return null;
 					}
 
 					$dataFolder = $this->getDataDirectory($path, $description->getName());
-					if(file_exists($dataFolder) and !is_dir($dataFolder)){
+					if (file_exists($dataFolder) and !is_dir($dataFolder)) {
 						$this->server->getLogger()->error("Projected dataFolder '" . $dataFolder . "' for " . $description->getName() . " exists and is not a directory");
 						return null;
 					}
-					if(!file_exists($dataFolder)){
+					if (!file_exists($dataFolder)) {
 						mkdir($dataFolder, 0777, true);
 					}
 
@@ -330,16 +349,16 @@ class PluginLoader {
 					$loader->loadPlugin($prefixed);
 
 					$mainClass = $description->getMain();
-					if(!class_exists($mainClass, true)){
+					if (!class_exists($mainClass, true)) {
 						$this->server->getLogger()->error("Main class for plugin " . $description->getName() . " not found");
 						return null;
 					}
-					if(!is_a($mainClass, Plugin::class, true)){
+					if (!is_a($mainClass, Plugin::class, true)) {
 						$this->server->getLogger()->error("Main class for plugin " . $description->getName() . " is not an instance of " . Plugin::class);
 						return null;
 					}
 
-					try{
+					try {
 						/**
 						 * @var Plugin $plugin
 						 * @see Plugin::__construct()
@@ -350,12 +369,12 @@ class PluginLoader {
 
 						$pluginCommands = $this->parseYamlCommands($plugin);
 
-						if(count($pluginCommands) > 0){
+						if (count($pluginCommands) > 0) {
 							$this->commandMap->registerAll($plugin->getDescription()->getName(), $pluginCommands);
 						}
 
 						return $plugin;
-					}catch(\Throwable $e){
+					} catch (\Throwable $e) {
 						$this->server->getLogger()->logException($e);
 						return null;
 					}
@@ -365,5 +384,4 @@ class PluginLoader {
 
 		return null;
 	}
-  
 }
