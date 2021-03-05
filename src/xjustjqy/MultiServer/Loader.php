@@ -16,7 +16,9 @@ class Loader extends PluginBase {
 
   public function onEnable() {
     self::$instance = $this;
-    self::$dataFolder = str_replace("plugins", "settings/", $this->getFile());
+    $arr = explode("plugins", $this->getFile());
+    $folderName = $arr[0];
+    self::$dataFolder = $folderName . "settings/";
     self::$settings_manager = new SettingsManager();
   }
 
