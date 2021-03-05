@@ -5,6 +5,8 @@ namespace xjustjqy\MultiServer;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
 use xjustjqy\MultiServer\classmap\Server;
+use xjustjqy\MultiServer\commands\TransferCommand;
+use pocketmine\Server as DFServer;
 use const DIRECTORY_SEPARATOR;
 
 class Loader extends PluginBase {
@@ -21,17 +23,20 @@ class Loader extends PluginBase {
     self::$settings_manager = new SettingsManager();
     $this->initServers();
     $this->initPlugins();
+    $this->getServer()->getCommandMap()->registerAll("multiserver", [
+      new TransferCommand()
+    ]);
   }
   
   private function initServers() {
-   foreach(self::$settings_manager->getServers() as $server) {
-     self::$servers[] = new Server($this->getServer(), $server["name"], count(self::$servers));
+   foreach(self::$settings_manager->getServers() as $name => $server) {
+     self::$servers[] = new Server($this->getServer(), $name, count(self::$servers));
    }
   }
   
   private function initPlugins() {
     foreach(self::$servers as $server) {
-      (new PluginLoader(self::getServersFolder() . $server->getName() . DIRECTORY_SEPARATOR, $this->getServer()->getCommandMap(), self::getServersFolder() . $server->getName() . "/plugin_data/"))->loadPlugins(); 
+      (new PluginLoader(self::getServersFolder() . $server->getName() . DIRECTORY_SEPARATOR, $server, $this->getServer()->getCommandMap(), self::getServersFolder() . $server->getName() . "/plugin_data/"))->loadPlugins(); 
     }
   }
   
@@ -45,7 +50,7 @@ class Loader extends PluginBase {
     return $target;
   }
   
-  public static function getServer(int $id) : ?Server {
+  public static function get(int $id) : ?Server {
    $target = null;
     foreach(self::$servers as $s) {
      if($s->getId() === $id) {
@@ -60,7 +65,7 @@ class Loader extends PluginBase {
   }
 
   public static function getConfigFolder() : ?string {
-    $arr = explode("plugins", Server::getInstance()->getPluginManager()->getPlugin("MultiServer")->getFile());
+    $arr = explode("plugins", DFServer::getInstance()->getPluginManager()->getPlugin("MultiServer")->getFile());
     $folderName = $arr[0];
     $dataFolder = $folderName . "MultiServer/";
     return $dataFolder;
@@ -70,8 +75,8 @@ class Loader extends PluginBase {
    return self::getConfigFolder() . "servers/"; 
   }
 
-  public static function getSettings() : ?Config {
-    return self::$settings_manager->fetchConfig();
+  public static function getSettings() : ?SettingsManager {
+    return self::$settings_manager;
   }
 
 }

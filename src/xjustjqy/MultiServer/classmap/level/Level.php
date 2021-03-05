@@ -2,17 +2,17 @@
 
 namespace xjustjqy\MultiServer\classmap\level;
 
-use pocketmine\level\Level as Default;
+use pocketmine\level\Level as DF;
 use xjustjqy\MultiServer\classmap\Server;
 
-class Level extends Default {
+class Level extends DF {
 
   /** @var string */
   private $server;
-  /** @var Default */
+  /** @var DF */
   private $level;
   
-  public function__construct(Default $level, Server $server) {
+  public function __construct(DF $level, Server $server) {
     $this->level = $level;
     $this->server = $server;
   }

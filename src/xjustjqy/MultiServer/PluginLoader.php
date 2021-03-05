@@ -2,8 +2,8 @@
 
 namespace xjustjqy\MultiServer;
 
-use xjustjqy\MultiServer\Server as SudoServer;
-use pocketmine\plugin\PluginLoader as Default;
+use xjustjqy\MultiServer\classmap\Server as SudoServer;
+use pocketmine\plugin\PluginLoader as DF;
 use pocketmine\plugin\PluginDescription;
 use pocketmine\plugin\PluginBase;
 use pocketmine\plugin\Plugin;
@@ -54,7 +54,7 @@ use function strlen;
 use function substr;
 use const DIRECTORY_SEPARATOR;
 
-class PluginLoader extends Default {
+class PluginLoader {
   
   /** @var string */
   
@@ -95,7 +95,7 @@ class PluginLoader extends Default {
     $this->registerInterface($this);
   }
   
-  public function registerInterface(Default $loader) : void{
+  public function registerInterface(PluginLoader $loader) : void{
 		$this->fileAssociations[get_class($loader)] = $loader;
 	}
   
@@ -143,7 +143,7 @@ class PluginLoader extends Default {
 	}
 
   
-  public function loadPlugins() {
+  public function loadPlugins($newLoaders = null) {
     $directory = $this->dir;
     if(!is_dir($directory)){
 			return [];

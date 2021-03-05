@@ -2,7 +2,7 @@
 
 namespace xjustjqy\MultiServer\worlds;
 
-use pocketmine\level\Level as DefaultLevel;
+use pocketmine\level\Level as DFLevel;
 use xjustjqy\MultiServer\classmap\Server;
 
 class WorldManager {
@@ -11,7 +11,7 @@ class WorldManager {
   private $levels = [];
   
   public function __construct() {
-    $this->levels = Server::getInstance()->getLevels();
+    $this->levels = Server::fetch()->getLevels();
   }
   
 }

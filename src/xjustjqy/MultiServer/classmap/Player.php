@@ -2,18 +2,18 @@
 
 namespace xjustjqy\MultiServer\classmap;
 
-use pocketmine\Player as DefaultPlayer;
-use pocketmine\Server as DefaultServer;
+use pocketmine\Player as DFPlayer;
+use pocketmine\Server as DFServer;
 use xjustjqy\MultiServer\Loader as API;
 
-class Player extends DefaultPlayer {
+class Player extends DFPlayer {
   
-  /** @var DefaultPlayer */
+  /** @var DFPlayer */
   private $player;
   /** @var Server */
   private $server;
  
-  public function __construct(DefaultPlayer $player, Server $current) {
+  public function __construct(DFPlayer $player, Server $current) {
     $this->player = $player;
     $this->setServer($current);
   }
@@ -26,7 +26,7 @@ class Player extends DefaultPlayer {
     $this->server = $server;
   }
   
-  public function getPlayer() : DefaultPlayer {
+  public function getPlayer() : DFPlayer {
     return $this->player; 
   }
 }

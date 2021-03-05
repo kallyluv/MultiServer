@@ -13,11 +13,26 @@ class SettingsManager {
     }
 
     public function fetchConfig() : Config {
-      return new Config(Loader::getConfigFolder() . "settings/settings.yml", Config::YAML, []);
+      @mkdir(Loader::getConfigFolder());
+      @mkdir(Loader::getConfigFolder() . "settings/");
+      return new Config(Loader::getConfigFolder() . "settings/settings.yml", Config::YAML, [
+        "servers" => [
+          "exampleServer" => [
+            "levels" => [
+              [
+                "name" => "example",
+                "seed" => 0,
+                "generator_type" => "default",
+                "options" => []
+              ]
+            ]
+          ]
+        ]
+      ]);
     }
 
     public function getServers() : array {
-      return $this->fetchConfig()->get("servers");
+      return ($this->fetchConfig()->get("servers") !== false) ? $this->fetchConfig()->get("servers") : [];
     }
 
     public function get(string $which) {
