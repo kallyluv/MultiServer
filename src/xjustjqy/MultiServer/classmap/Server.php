@@ -11,9 +11,15 @@ class Server extends Default {
   protected $levels = [];
   /** @var Default */
   private $server;
+  /** @var string */
+  private $name;
+  /** @var int */
+  private $id;
   
-  public function __construct(Default $server) {
+  public function __construct(Default $server, string $name, int $id) {
     $this->server = $server;
+    $this->name = $name;
+    $this->id = $id;
     $this->loadLevels();
   }
   
@@ -31,5 +37,13 @@ class Server extends Default {
   public function getLevels() : array {
    return $this->levels; 
   }
+	
+	public function getId() : int {
+		return $this->id;	
+	}
+	
+	public function getName() : string {
+		return $this->name;	
+	}
   
 }
