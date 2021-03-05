@@ -24,10 +24,14 @@ class Server extends Default {
   }
   
   public function loadLevels() {
-    foreach(API::getInstance()->getSettings()->get("servers") as $server) {
+    foreach(API::getInstance()->getSettings()->getServers() as $server) {
       foreach($server["levels"] as $level) {
-        if($this->server->loadLevel($level)) {
-          $world = $this->server->getLevelByName($level);
+	$S = Default::getInstance();
+	if(!$S->isLevelGenerated($level["name"])) {
+           $S->generateLevel($level["name"], $level["seed"], $level["generator_type"], $level["options"]);
+        }
+        if($this->server->loadLevel($level["name"])) {
+          $world = $this->server->getLevelByName($level["name"]);
           $this->levels[] = $world;
         }
       }
