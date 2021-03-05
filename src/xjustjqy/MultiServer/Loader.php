@@ -5,6 +5,7 @@ namespace xjustjqy\MultiServer;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
 use xjustjqy\MultiServer\classmap\Server;
+use const DIRECTORY_SEPARATOR;
 
 class Loader extends PluginBase {
 
@@ -19,12 +20,19 @@ class Loader extends PluginBase {
     self::$instance = $this;
     self::$settings_manager = new SettingsManager();
     $this->initServers();
+    $this->initPlugins();
   }
   
   private function initServers() {
    foreach(self::$settings_manager->getServers() as $server) {
-     self::$servers[] = new Server($this->getServer());
+     self::$servers[] = new Server($this->getServer(), $server["name"], count(self::$servers));
    }
+  }
+  
+  private function initPlugins() {
+    foreach(self::$servers as $server) {
+      (new PluginLoader(self::getServersFolder() . $server->getName() . DIRECTORY_SEPARATOR))->loadPlugins(); 
+    }
   }
   
   public static function getServerByName(string $name) : ?Server {
