@@ -5,7 +5,7 @@ A proxy plugin!
 
 # SneakPeeks
 
-1. [![Sneakpeek!!!](http://i3.ytimg.com/vi/BwNlNTnYg2o/maxresdefault.jpg)](https://youtu.be/BwNlNTnYg2o)
+- [![Sneakpeek!!!](http://i3.ytimg.com/vi/BwNlNTnYg2o/maxresdefault.jpg)](https://youtu.be/BwNlNTnYg2o)
 
 # Contribution
 
