@@ -31,7 +31,7 @@ class Loader extends PluginBase {
   
   private function initPlugins() {
     foreach(self::$servers as $server) {
-      (new PluginLoader(self::getServersFolder() . $server->getName() . DIRECTORY_SEPARATOR))->loadPlugins(); 
+      (new PluginLoader(self::getServersFolder() . $server->getName() . DIRECTORY_SEPARATOR, $this->getServer()->getCommandMap(), self::getServersFolder() . $server->getName() . "/plugin_data/"))->loadPlugins(); 
     }
   }
   
