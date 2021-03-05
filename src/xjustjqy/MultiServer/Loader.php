@@ -9,16 +9,11 @@ class Loader extends PluginBase {
 
   /** @var self */
   private static $instance;
-  /** @var string */
-  private static $dataFolder;
   /** @var SettingsManager */
   private static $settings_manager;
 
   public function onEnable() {
     self::$instance = $this;
-    $arr = explode("plugins", $this->getFile());
-    $folderName = $arr[0];
-    self::$dataFolder = $folderName . "MultiServer/";
     self::$settings_manager = new SettingsManager();
   }
 
@@ -27,7 +22,10 @@ class Loader extends PluginBase {
   }
 
   public static function getConfigFolder() : ?string {
-    return self::dataFolder;
+    $arr = explode("plugins", Server::getInstance()->getPluginManager()->getPlugin("MultiServer")->getFile());
+    $folderName = $arr[0];
+    $dataFolder = $folderName . "MultiServer/";
+    return $dataFolder;
   }
 
   public static function getSettings() : ?Config {
