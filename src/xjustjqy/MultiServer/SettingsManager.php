@@ -9,10 +9,11 @@ class SettingsManager {
 
     public function __construct() {
       @mkdir(Loader::getConfigFolder());
+      @mkdir(Loader::getConfigFolder() . "settings/");
     }
 
     public function fetchConfig() : Config {
-      return new Config(Loader::getConfigFolder() . "settings.yml", Config::YAML, []);
+      return new Config(Loader::getConfigFolder() . "settings/settings.yml", Config::YAML, []);
     }
 
     public function getServers() : array {
