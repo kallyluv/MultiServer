@@ -11,10 +11,12 @@ class Loader extends PluginBase {
   private static $instance;
   /** @var string */
   private static $dataFolder;
+  /** @var SettingsManager */
+  private static $settings_manager;
 
   public function onEnable() {
     self::$instance = $this;
-    self::$dataFolder = str_replace("plugins", "", $this->getFile());
+    self::$dataFolder = str_replace("plugins", "settings/", $this->getFile());
     self::$settings_manager = new SettingsManager();
   }
 
